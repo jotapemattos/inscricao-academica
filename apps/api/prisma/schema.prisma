@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id       String            @id @default(uuid())
+  name     String
+  email    String            @unique
+  password String
+  classes  ClassEnrollment[]
+  waitlist WaitList[]
+
+  @@map("users")
+}
+
+model Subject {
+  id       Int       @id @default(autoincrement())
+  name     String
+  children Subject[] @relation("SubjectChildren")
+  parent   Subject?  @relation("SubjectChildren", fields: [parentId], references: [id])
+  parentId Int?      @map("chapterId")
+  Class    Class[]
+
+  @@map("subjects")
+}
+
+model Class {
+  id          String            @id @default(uuid())
+  name        String
+  teacher     String
+  place       String
+  startTime   DateTime
+  endTime     DateTime
+  maxStudents Int
+  enrollments ClassEnrollment[]
+  waitlist    WaitList[]
+  subject     Subject           @relation(fields: [subjectId], references: [id])
+  subjectId   Int
+
+  @@map("classes")
+}
+
+model ClassEnrollment {
+  id        String  @id @default(uuid())
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId String
+  class     Class   @relation(fields: [classId], references: [id])
+  classId   String
+
+  @@unique([studentId, classId])
+}
+
+model WaitList {
+  id        String  @id @default(uuid())
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId String  
+  class     Class   @relation(fields: [classId], references: [id])
+  classId   String  
+
+  @@unique([studentId, classId])
+}
