@@ -24,7 +24,8 @@ model Subject {
   children Subject[] @relation("SubjectChildren")
   parent   Subject?  @relation("SubjectChildren", fields: [parentId], references: [id])
   parentId Int?      @map("chapterId")
-  Class    Class[]
+  credits  Int       @default(0)
+  classes  Class[]
 
   @@map("subjects")
 }
@@ -58,9 +59,9 @@ model ClassEnrollment {
 model WaitList {
   id        String  @id @default(uuid())
   student   Student @relation(fields: [studentId], references: [id])
-  studentId String  
+  studentId String
   class     Class   @relation(fields: [classId], references: [id])
-  classId   String  
+  classId   String
 
   @@unique([studentId, classId])
 }

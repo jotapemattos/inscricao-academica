@@ -1,4 +1,10 @@
-import { Body, Controller, Post, UsePipes } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Post,
+  UsePipes,
+} from '@nestjs/common';
 import { ZodValidationPipe } from 'src/pipes/zod-validator-pipe';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { z } from 'zod';
@@ -31,17 +37,58 @@ export class ClassEnrollmentController {
       },
     });
 
+    const enrollments = await this.prisma.classEnrollment.findMany({
+      where: { studentId: studentId },
+      include: {
+        class: {
+          include: {
+            subject: true,
+          },
+        },
+      },
+    });
+
+    const selectedSubject = await this.prisma.class.findUnique({
+      where: { id: classId },
+      include: { subject: true },
+    });
+
+    const totalCredits = enrollments.reduce((sum, enrollment) => {
+      return sum + (enrollment.class.subject.credits || 0);
+    }, 0);
+
+    const conflictSchedule = enrollments.filter(
+      (enrolmment) =>
+        enrolmment.class.startTime.getTime() ===
+        selectedClass?.startTime.getTime(),
+    );
+
+    // RN00
+    if (conflictSchedule.length > 0) {
+      throw new ForbiddenException(
+        'Não foi possível se matricular na matéria. O aluno já possui aula nesse horário. ',
+      );
+    }
+
+    // RN01 - Quantidade máxima de inscrições por semestre letivo
+    if (totalCredits + selectedSubject!.subject.credits > 20) {
+      throw new ForbiddenException(
+        'Não foi possível se matricular na matéria. O aluno ultrapassou o limite de créditos.',
+      );
+    }
+
     // RN02 - Quantidade de alunos possíveis
     if (selectedClass!.maxStudents <= classEnrollments) {
-      return await this.prisma.waitList.create({
+      await this.prisma.waitList.create({
         data: {
           studentId,
           classId,
         },
       });
+      return 'Aluno adicionado a lista de espera';
     }
 
-    return await this.prisma.classEnrollment.create({
+    await this.prisma.classEnrollment.create({
       data: {
         studentId,
         classId,
