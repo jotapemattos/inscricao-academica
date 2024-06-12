@@ -84,9 +84,7 @@ function Subjects() {
         Disciplinas disponíveis
       </h1>
       <Button asChild>
-        <Link to={'/revisar-matricula'}>
-          Revisar Matricula
-        </Link>
+        <Link to={"/revisar-matricula"}>Revisar Matricula</Link>
       </Button>
       <section className="flex justify-center flex-wrap items-center gap-6 max-w-screen-2xl">
         {data.map((availableClass) => (

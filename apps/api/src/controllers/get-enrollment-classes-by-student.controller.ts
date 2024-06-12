@@ -1,26 +1,22 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Query } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-
-type RequestParams = {
-  studentId: string;
-};
 
 @Controller('class-enrollments-by-student')
 export class GetClassEnrollmentsByStudentController {
   constructor(private prisma: PrismaService) {}
 
-  @Get(':id')
-  async handle(@Param() params: RequestParams) {
+  @Get()
+  async handle(@Query('studentId') studentId: string) {
     return await this.prisma.classEnrollment.findMany({
+      where: {
+        studentId: studentId,
+      },
       include: {
         class: {
           include: {
             subject: true,
           },
         },
-      },
-      where: {
-        studentId: params.studentId,
       },
     });
   }

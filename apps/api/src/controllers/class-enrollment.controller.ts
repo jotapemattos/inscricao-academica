@@ -136,7 +136,8 @@ export class ClassEnrollmentController {
       );
     }
 
-    // RN03 - Um aluno não pode se inscrever em uma turma de uma disciplina para a qual não possua os pre requisitos necessários. Além disso, um aluno não pode se inscrever em uma turma de alguma disciplina que já tenha cursado com aprovação.
+    // RN03 - Um aluno não pode se inscrever em uma turma de uma disciplina para a qual não possua os pre requisitos necessários.
+    //Além disso, um aluno não pode se inscrever em uma turma de alguma disciplina que já tenha cursado com aprovação.
     if (isSubjectCompleted) {
       throw new PreconditionFailedException(
         'Não foi possível se matricular na matéria. O aluno já foi aprovado nessa disciplina',
@@ -144,7 +145,8 @@ export class ClassEnrollmentController {
     }
     if (prerequiste && !isPrerequisiteCompleted?.passed) {
       throw new PreconditionFailedException(
-        `Não foi possível se matricular na matéria. A disciplina "${selectedSubject?.subject.name}" exige aprovação na disciplina "${prerequiste?.prerequisiteSubject.name}"`,
+        `Não foi possível se matricular na matéria. A disciplina "${selectedSubject?.subject.name}" exige aprovação 
+        na disciplina "${prerequiste?.prerequisiteSubject.name}"`,
       );
     }
     if (studentId && classId) {

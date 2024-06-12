@@ -26,6 +26,7 @@ function ReviewEnrollment() {
         throw res;
       })
       .then((data) => {
+        console.log(data);
         setStudent(data);
       })
       .catch((error) => {
@@ -34,13 +35,16 @@ function ReviewEnrollment() {
   }, []);
 
   useEffect(() => {
-    fetch(`http://localhost:3333/class-enrollments-by-student/${student?.id}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "http://localhost:5173",
+    fetch(
+      `http://localhost:3333/class-enrollments-by-student?studentId=${student?.id}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "http://localhost:5173",
+        },
       },
-    })
+    )
       .then((res) => {
         if (res.ok) {
           return res.json();
@@ -53,7 +57,7 @@ function ReviewEnrollment() {
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  }, [student]);
 
   const handleDelete = (classEnrollmentId: string) => {
     const promise = new Promise((resolve, reject) => {
