@@ -15,7 +15,7 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['.eslintrc.js', 'tailwind.config.ts', 'vite.config.ts', 'postcss.config.js'],
+  ignorePatterns: ['.eslintrc.cjs', 'tailwind.config.ts', 'vite.config.ts', 'postcss.config.js'],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',

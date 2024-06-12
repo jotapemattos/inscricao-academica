@@ -68,6 +68,9 @@
 
   @layer base {
     * {
+      padding: 0px;
+      margin: 0px;
+      box-sizing: border-box;
       @apply border-border;
     }
     body {

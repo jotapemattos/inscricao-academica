@@ -17,6 +17,7 @@ export const classSchema = z.object({
   maxStudents: z.number().int().positive(),
   subjectId: z.number().int().positive(),
   subject: subjectSchema,
+  enrolledStudentsCount: z.number().int().positive(),
 });
 
 export type ClassSchema = z.infer<typeof classSchema>;
@@ -29,3 +30,12 @@ const studentSchema = z.object({
 });
 
 export type StudentSchema = z.infer<typeof studentSchema>;
+
+const classEnrollmentSchema = z.object({
+  id: z.string().uuid(),
+  studentId: z.string().uuid(),
+  classId: z.string().uuid(),
+  class: classSchema,
+});
+
+export type ClassesEnrollmentByStudent = z.infer<typeof classEnrollmentSchema>
