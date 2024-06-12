@@ -8,26 +8,37 @@ datasource db {
 }
 
 model Student {
-  id       String            @id @default(uuid())
-  name     String
-  email    String            @unique
-  password String
-  classes  ClassEnrollment[]
-  waitlist WaitList[]
+  id                String             @id @default(uuid())
+  name              String
+  email             String             @unique
+  password          String
+  classes           ClassEnrollment[]
+  waitlist          WaitList[]
+  completedSubjects CompletedSubject[]
 
   @@map("users")
 }
 
 model Subject {
-  id       Int       @id @default(autoincrement())
-  name     String
-  children Subject[] @relation("SubjectChildren")
-  parent   Subject?  @relation("SubjectChildren", fields: [parentId], references: [id])
-  parentId Int?      @map("chapterId")
-  credits  Int       @default(0)
-  classes  Class[]
+  id                  Int                @id @default(autoincrement())
+  name                String
+  credits             Int                @default(0)
+  classes             Class[]
+  targetSubject       Prerequisite[]     @relation("SubjectPrerequisites")
+  prerequisiteSubject Prerequisite[]     @relation("PrerequisiteSubjects")
+  completedSubjects   CompletedSubject[]
 
   @@map("subjects")
+}
+
+model Prerequisite {
+  id                    Int     @id @default(autoincrement())
+  targetSubject         Subject @relation("SubjectPrerequisites", fields: [targetSubjectId], references: [id])
+  targetSubjectId       Int
+  prerequisiteSubject   Subject @relation("PrerequisiteSubjects", fields: [prerequisiteSubjectId], references: [id])
+  prerequisiteSubjectId Int
+
+  @@map("prequisites")
 }
 
 model Class {
@@ -54,6 +65,7 @@ model ClassEnrollment {
   classId   String
 
   @@unique([studentId, classId])
+  @@map("class_enrollments")
 }
 
 model WaitList {
@@ -64,4 +76,17 @@ model WaitList {
   classId   String
 
   @@unique([studentId, classId])
+  @@map("wait_list")
+}
+
+model CompletedSubject {
+  id        String  @id @default(uuid())
+  student   Student @relation(fields: [studentId], references: [id])
+  studentId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+  subjectId Int
+  passed    Boolean
+
+  @@unique([studentId, subjectId])
+  @@map("completed_subjects")
 }

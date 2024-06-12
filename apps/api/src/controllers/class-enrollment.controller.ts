@@ -1,8 +1,9 @@
 import {
+  All,
   Body,
   Controller,
   ForbiddenException,
-  Post,
+  PreconditionFailedException,
   UsePipes,
 } from '@nestjs/common';
 import { ZodValidationPipe } from 'src/pipes/zod-validator-pipe';
@@ -10,8 +11,9 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { z } from 'zod';
 
 const classEnrollmentBodySchema = z.object({
-  studentId: z.string(),
-  classId: z.string(),
+  studentId: z.string().optional(),
+  classId: z.string().optional(),
+  classEnrollmentId: z.string().optional(),
 });
 
 type ClassEnrollmentBodySchema = z.infer<typeof classEnrollmentBodySchema>;
@@ -21,9 +23,21 @@ type ClassEnrollmentBodySchema = z.infer<typeof classEnrollmentBodySchema>;
 export class ClassEnrollmentController {
   constructor(private prisma: PrismaService) {}
 
-  @Post()
+  @All()
   async handle(@Body() body: ClassEnrollmentBodySchema) {
-    const { studentId, classId } = body;
+    const { studentId, classId, classEnrollmentId } = body;
+
+    if (classEnrollmentId) {
+      await this.prisma.classEnrollment.delete({
+        where: {
+          id: classEnrollmentId,
+        },
+      });
+      return {
+        status: 200,
+        message: 'Matrícula removida com sucesso',
+      };
+    }
 
     const selectedClass = await this.prisma.class.findFirst({
       where: {
@@ -63,6 +77,51 @@ export class ClassEnrollmentController {
         selectedClass?.startTime.getTime(),
     );
 
+    const isSubjectCompleted = await this.prisma.completedSubject.findFirst({
+      where: {
+        studentId,
+        subjectId: selectedSubject?.subjectId,
+      },
+      select: {
+        passed: true,
+      },
+    });
+
+    const prerequiste = await this.prisma.prerequisite.findFirst({
+      where: {
+        targetSubjectId: selectedSubject?.subjectId,
+      },
+      select: {
+        prerequisiteSubject: true,
+      },
+    });
+
+    const isPrerequisiteCompleted =
+      await this.prisma.completedSubject.findFirst({
+        where: {
+          studentId,
+          subjectId: prerequiste?.prerequisiteSubject.id,
+        },
+        select: {
+          passed: true,
+        },
+      });
+
+    // RN02 - Quantidade de alunos possíveis
+    if (
+      selectedClass!.maxStudents <= classEnrollments &&
+      studentId &&
+      classId
+    ) {
+      await this.prisma.waitList.create({
+        data: {
+          studentId,
+          classId,
+        },
+      });
+      return { message: 'Aluno adicionado a lista de espera' };
+    }
+
     // RN00
     if (conflictSchedule.length > 0) {
       throw new ForbiddenException(
@@ -77,22 +136,25 @@ export class ClassEnrollmentController {
       );
     }
 
-    // RN02 - Quantidade de alunos possíveis
-    if (selectedClass!.maxStudents <= classEnrollments) {
-      await this.prisma.waitList.create({
+    // RN03 - Um aluno não pode se inscrever em uma turma de uma disciplina para a qual não possua os pre requisitos necessários. Além disso, um aluno não pode se inscrever em uma turma de alguma disciplina que já tenha cursado com aprovação.
+    if (isSubjectCompleted) {
+      throw new PreconditionFailedException(
+        'Não foi possível se matricular na matéria. O aluno já foi aprovado nessa disciplina',
+      );
+    }
+    if (prerequiste && !isPrerequisiteCompleted?.passed) {
+      throw new PreconditionFailedException(
+        `Não foi possível se matricular na matéria. A disciplina "${selectedSubject?.subject.name}" exige aprovação na disciplina "${prerequiste?.prerequisiteSubject.name}"`,
+      );
+    }
+    if (studentId && classId) {
+      await this.prisma.classEnrollment.create({
         data: {
           studentId,
           classId,
         },
       });
-      return 'Aluno adicionado a lista de espera';
+      return { message: 'Matrícula realizada com sucesso.' };
     }
-
-    await this.prisma.classEnrollment.create({
-      data: {
-        studentId,
-        classId,
-      },
-    });
   }
 }
