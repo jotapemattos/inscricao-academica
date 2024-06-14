@@ -6,8 +6,8 @@ import {
   PreconditionFailedException,
   UsePipes,
 } from '@nestjs/common';
-import { ZodValidationPipe } from 'src/pipes/zod-validator-pipe';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { ZodValidationPipe } from '@/pipes/zod-validator-pipe';
+import { PrismaService } from '@/prisma/prisma.service';
 import { z } from 'zod';
 
 const classEnrollmentBodySchema = z.object({
