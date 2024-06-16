@@ -1,5 +1,4 @@
 import { ClassEnrollmentRepository } from '@/repositories/class-enrollment-repository';
-
 import { ClassEnrollment } from '@prisma/client';
 import { UnfulfilledPrerequisitesError } from './errors/unfulfilled-prerequisites-error';
 import { StudentAlreadyPassedError } from './errors/student-already-passed-error';
@@ -12,8 +11,9 @@ interface ClassEnrollmentUseCaseRequest {
   classEnrollmentId?: string;
 }
 
-interface ClassEnrollmentUseCaseResponse {
+export interface ClassEnrollmentUseCaseResponse {
   classEnrollment: ClassEnrollment;
+  message?: string;
 }
 
 export class ClassEnrollmentUseCase {
@@ -26,6 +26,8 @@ export class ClassEnrollmentUseCase {
   }: ClassEnrollmentUseCaseRequest): Promise<
     ClassEnrollmentUseCaseResponse | undefined
   > {
+    let message: string;
+
     //RN - Revisao
     if (classEnrollmentId) {
       await this.classEnrollmetRepository.delete(classEnrollmentId);
@@ -42,7 +44,7 @@ export class ClassEnrollmentUseCase {
         classId: classId as string,
         studentId: studentId as string,
       });
-
+      message = 'Aluno adicionado a lista de espera com sucesso';
       return;
     }
 
@@ -97,9 +99,11 @@ export class ClassEnrollmentUseCase {
       classId: classId as string,
       studentId: studentId as string,
     });
+    message = 'Aluno matriculado com sucesso';
 
     return {
       classEnrollment,
+      message,
     };
   }
 }

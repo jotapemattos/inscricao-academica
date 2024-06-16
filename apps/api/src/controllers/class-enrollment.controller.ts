@@ -1,9 +1,23 @@
-import { All, Body, Controller, UsePipes } from '@nestjs/common';
+import {
+  All,
+  Body,
+  Controller,
+  ForbiddenException,
+  PreconditionFailedException,
+  UsePipes,
+} from '@nestjs/common';
 import { ZodValidationPipe } from '@/pipes/zod-validator-pipe';
 import { PrismaService } from '@/prisma/prisma.service';
 import { z } from 'zod';
-import { ClassEnrollmentUseCase } from '@/use-cases/class-enrollment-use-case';
+import {
+  ClassEnrollmentUseCase,
+  ClassEnrollmentUseCaseResponse,
+} from '@/use-cases/class-enrollment-use-case';
 import { PrismaClassEnrollmentRepository } from '@/repositories/prisma/prisma-class-enrollment-repository';
+import { StudentAlreadyPassedError } from '@/use-cases/errors/student-already-passed-error';
+import { ScheduleConflitError } from '@/use-cases/errors/schedule-conflit-error';
+import { StudentCreditsExceededError } from '@/use-cases/errors/student-credits-exceeded-error';
+import { UnfulfilledPrerequisitesError } from '@/use-cases/errors/unfulfilled-prerequisites-error';
 
 const classEnrollmentBodySchema = z.object({
   studentId: z.string().optional(),
@@ -26,20 +40,29 @@ export class ClassEnrollmentController {
 
     const classEnrollmentUseCase = new ClassEnrollmentUseCase(prismaRepository);
 
+    let response: ClassEnrollmentUseCaseResponse | undefined;
+
     try {
-      const enrollment = await classEnrollmentUseCase.execute({
+      response = await classEnrollmentUseCase.execute({
         studentId,
         classId,
         classEnrollmentId,
       });
-
-      if (enrollment) {
-        return { message: 'Deu certo' };
-      }
     } catch (error) {
-      console.log(error);
+      if (error instanceof StudentCreditsExceededError) {
+        return new ForbiddenException(error.message);
+      }
+      if (error instanceof ScheduleConflitError) {
+        return new ForbiddenException(error.message);
+      }
+      if (error instanceof StudentAlreadyPassedError) {
+        return new PreconditionFailedException(error.message);
+      }
+      if (error instanceof UnfulfilledPrerequisitesError) {
+        return new PreconditionFailedException(error.message);
+      }
     }
 
-    return { message: 'Deu certo' };
+    return { message: response?.message, status: 200 };
   }
 }
