@@ -63,6 +63,13 @@ export class ClassEnrollmentController {
       }
     }
 
-    return { message: response?.message, status: 200 };
+    if (response?.waitList) {
+      return {
+        message: 'Adicionado a lista de espera com sucesso.',
+        status: 200,
+      };
+    }
+
+    return { message: 'Matricula realizada com sucesso.' };
   }
 }

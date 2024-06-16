@@ -1,5 +1,5 @@
 import { ClassEnrollmentRepository } from '@/repositories/class-enrollment-repository';
-import { ClassEnrollment } from '@prisma/client';
+import { ClassEnrollment, WaitList } from '@prisma/client';
 import { UnfulfilledPrerequisitesError } from './errors/unfulfilled-prerequisites-error';
 import { StudentAlreadyPassedError } from './errors/student-already-passed-error';
 import { ScheduleConflitError } from './errors/schedule-conflit-error';
@@ -12,8 +12,8 @@ interface ClassEnrollmentUseCaseRequest {
 }
 
 export interface ClassEnrollmentUseCaseResponse {
-  classEnrollment: ClassEnrollment;
-  message?: string;
+  classEnrollment?: ClassEnrollment;
+  waitList?: WaitList;
 }
 
 export class ClassEnrollmentUseCase {
@@ -26,8 +26,6 @@ export class ClassEnrollmentUseCase {
   }: ClassEnrollmentUseCaseRequest): Promise<
     ClassEnrollmentUseCaseResponse | undefined
   > {
-    let message: string;
-
     //RN - Revisao
     if (classEnrollmentId) {
       await this.classEnrollmetRepository.delete(classEnrollmentId);
@@ -40,12 +38,11 @@ export class ClassEnrollmentUseCase {
     );
 
     if (isClassFull) {
-      await this.classEnrollmetRepository.addOnWaitList({
+      const waitList = await this.classEnrollmetRepository.addOnWaitList({
         classId: classId as string,
         studentId: studentId as string,
       });
-      message = 'Aluno adicionado a lista de espera com sucesso';
-      return;
+      return { waitList };
     }
 
     // RN - Prerequisitos
@@ -99,11 +96,9 @@ export class ClassEnrollmentUseCase {
       classId: classId as string,
       studentId: studentId as string,
     });
-    message = 'Aluno matriculado com sucesso';
 
     return {
       classEnrollment,
-      message,
     };
   }
 }
