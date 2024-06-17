@@ -14,6 +14,7 @@ interface ClassEnrollmentUseCaseRequest {
 export interface ClassEnrollmentUseCaseResponse {
   classEnrollment?: ClassEnrollment;
   waitList?: WaitList;
+  hasRemoved?: boolean;
 }
 
 export class ClassEnrollmentUseCase {
@@ -23,13 +24,11 @@ export class ClassEnrollmentUseCase {
     studentId,
     classId,
     classEnrollmentId,
-  }: ClassEnrollmentUseCaseRequest): Promise<
-    ClassEnrollmentUseCaseResponse | undefined
-  > {
+  }: ClassEnrollmentUseCaseRequest): Promise<ClassEnrollmentUseCaseResponse> {
     //RN - Revisao
     if (classEnrollmentId) {
       await this.classEnrollmetRepository.delete(classEnrollmentId);
-      return;
+      return { hasRemoved: true };
     }
 
     //RN - Classe cheia (adicionado a lista de espera)

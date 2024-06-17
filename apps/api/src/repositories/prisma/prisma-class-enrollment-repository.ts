@@ -96,7 +96,7 @@ export class PrismaClassEnrollmentRepository
       return isPrerequisiteCompleted.passed;
     }
 
-    return true;
+    return false;
   }
 
   async hasConflitOnSchedule({ classId, studentId }) {

@@ -64,7 +64,6 @@ function Subjects() {
         body: JSON.stringify({ studentId: student?.id, classId }),
       }).then(async (response) => {
         const responseData = await response.json();
-        console.log(responseData);
         if (responseData.status !== 200) {
           reject(responseData.message);
         }

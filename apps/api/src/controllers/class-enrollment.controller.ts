@@ -70,6 +70,13 @@ export class ClassEnrollmentController {
       };
     }
 
-    return { message: 'Matricula realizada com sucesso.' };
+    if (response?.hasRemoved) {
+      return {
+        message: 'Matricula removida com sucesso.',
+        status: 200,
+      };
+    }
+
+    return { message: 'Matricula realizada com sucesso.', status: 200 };
   }
 }

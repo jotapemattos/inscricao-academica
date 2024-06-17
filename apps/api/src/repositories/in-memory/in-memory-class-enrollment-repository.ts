@@ -80,7 +80,8 @@ export class InMemoryClassEnrollmentRepository
   }
 
   async hasConflitOnSchedule({ classId, studentId }) {
-    const selectedClass = this.classes.find((item) => item.id === classId);
+    //Nao foi necessario implementar
+    /*     const selectedClass = this.classes.find((item) => item.id === classId);
 
     const conflictSchedule = this.classEnrollments.filter((item) => {
       const currentClass = this.classes.find(
@@ -94,14 +95,14 @@ export class InMemoryClassEnrollmentRepository
 
     const hasConflit = conflictSchedule.length > 0;
 
-    return hasConflit;
+    return hasConflit; */
+    return false;
   }
 
   async totalCreditsByStudent(studentId: string) {
     const enrollmentsByStudent = this.classEnrollments.filter(
       (item) => item.studentId === studentId,
     );
-
     let credits = 0;
 
     enrollmentsByStudent.forEach((item) => {
@@ -115,7 +116,6 @@ export class InMemoryClassEnrollmentRepository
 
       credits += currentSubject!.credits;
     });
-
     return credits;
   }
 
