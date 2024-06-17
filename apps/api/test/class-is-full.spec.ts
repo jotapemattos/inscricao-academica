@@ -14,6 +14,7 @@ describe('O estudante pode entrar na lista de espera quando a turma estiver chei
     );
   });
 
+  // Testar a limite inferior inválido: se o aluno tentar se matricular em uma classe que possui capacidade para 20 alunos e já contém 20 alunos matriculados, ele deve ser adicionado a uma lista de espera.
   it('should add student in the waitList when class is full', async () => {
     await classEnrollmentRepository.addSubject({
       id: 689,
@@ -62,6 +63,7 @@ describe('O estudante pode entrar na lista de espera quando a turma estiver chei
     expect(response.waitList).toHaveProperty('classId', 'id-1');
   });
 
+  //Testar limite superior válido: quando uma turma possui capacidade de 20 alunos e tem apenas 19 alunos matriculados, o aluno deve conseguir se matricular nessa última vaga e esgotar o espaço da turma.
   it('should enroll student when there is at least 1 spot left (analise de valor limite)', async () => {
     await classEnrollmentRepository.addSubject({
       id: 689,
@@ -109,6 +111,7 @@ describe('O estudante pode entrar na lista de espera quando a turma estiver chei
     expect(response.classEnrollment).toHaveProperty('classId', 'id-1');
   });
 
+  // Testar limite inferior válido: o aluno deve conseguir se matricular se a turma estiver vazia.
   it('should enroll student when class is empty (analise de valor limite)', async () => {
     await classEnrollmentRepository.addSubject({
       id: 689,
