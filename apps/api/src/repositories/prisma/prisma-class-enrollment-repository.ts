@@ -99,7 +99,7 @@ export class PrismaClassEnrollmentRepository
     return false;
   }
 
-  async hasConflitOnSchedule({ classId, studentId }) {
+  async hasConflictOnSchedule({ classId, studentId }) {
     const selectedClass = await this.prisma.class.findFirst({
       where: {
         id: classId,

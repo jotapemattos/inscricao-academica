@@ -79,7 +79,7 @@ export class InMemoryClassEnrollmentRepository
     return true;
   }
 
-  async hasConflitOnSchedule({ classId, studentId }) {
+  async hasConflictOnSchedule({ classId, studentId }) {
     //Nao foi necessario implementar
     /*     const selectedClass = this.classes.find((item) => item.id === classId);
 

@@ -66,14 +66,14 @@ export class ClassEnrollmentUseCase {
       throw new StudentAlreadyPassedError();
     }
 
-    const hasConflitOnSchedule =
-      await this.classEnrollmetRepository.hasConflitOnSchedule({
+    const hasConflictOnSchedule =
+      await this.classEnrollmetRepository.hasConflictOnSchedule({
         studentId: studentId as string,
         classId: classId as string,
       });
 
     //conflito de horarios
-    if (hasConflitOnSchedule) {
+    if (hasConflictOnSchedule) {
       throw new ScheduleConflitError();
     }
 

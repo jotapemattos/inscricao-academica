@@ -19,7 +19,7 @@ export interface ClassEnrollmentRepository {
     studentId: string;
   }): Promise<boolean>;
   isClassFull(classId: string): Promise<boolean>;
-  hasConflitOnSchedule({
+  hasConflictOnSchedule({
     classId,
     studentId,
   }: {
