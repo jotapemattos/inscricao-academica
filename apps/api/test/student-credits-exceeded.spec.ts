@@ -3,6 +3,7 @@ import { ClassEnrollmentUseCase } from '@/use-cases/class-enrollment-use-case';
 import { StudentCreditsExceededError } from '@/use-cases/errors/student-credits-exceeded-error';
 import { expect, describe, it, beforeEach } from 'vitest';
 
+// classEnrollmentRepository faz referencia a uma simulacao de banco aplicado em memoria, para que o teste unitario nao se comunique diretamente com o banco de dados
 let classEnrollmentRepository: InMemoryClassEnrollmentRepository;
 let classEnrollmentUseCase: ClassEnrollmentUseCase;
 
