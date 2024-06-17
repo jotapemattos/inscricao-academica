@@ -25,13 +25,13 @@ export class ClassEnrollmentUseCase {
     classId,
     classEnrollmentId,
   }: ClassEnrollmentUseCaseRequest): Promise<ClassEnrollmentUseCaseResponse> {
-    //RN - Revisao
+    //Fluxo alternativo - Revisao de matricula
     if (classEnrollmentId) {
       await this.classEnrollmetRepository.delete(classEnrollmentId);
       return { hasRemoved: true };
     }
 
-    //RN - Classe cheia (adicionado a lista de espera)
+    //Fluxo alternativo 1 - Classe cheia (adicionado a lista de espera)
     const isClassFull = await this.classEnrollmetRepository.isClassFull(
       classId as string,
     );
@@ -44,7 +44,7 @@ export class ClassEnrollmentUseCase {
       return { waitList };
     }
 
-    // RN - Prerequisitos
+    // RN03 - Aluno nao foi aprovado nas disciplinas que a materia selecionada exige como pre-requisito
     const hasCompletedPrerequsite =
       await this.classEnrollmetRepository.hasCompletedPrerequisite({
         classId: classId as string,
@@ -55,7 +55,7 @@ export class ClassEnrollmentUseCase {
       throw new UnfulfilledPrerequisitesError();
     }
 
-    // RN - Ja passou na materia
+    // RN03 - Ja foi aprovado na disciplina selecionada
     const hasCompletedClass =
       await this.classEnrollmetRepository.hasCompletedClass({
         classId: classId as string,
@@ -72,12 +72,12 @@ export class ClassEnrollmentUseCase {
         classId: classId as string,
       });
 
-    //conflito de horarios
+    //RN00 - Aluno ja possui aula no horario da aula que deseja fazer a matricula
     if (hasConflictOnSchedule) {
       throw new ScheduleConflitError();
     }
 
-    // limite de creditos
+    //RN01 - Aluno atingiu o limite de creditos
     const totalCreditsByStudent =
       await this.classEnrollmetRepository.totalCreditsByStudent(
         studentId as string,
