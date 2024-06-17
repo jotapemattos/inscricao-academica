@@ -1,5 +1,5 @@
 import swc from 'unplugin-swc';
-import { defineConfig } from 'vitest/config';
+import { defineConfig, configDefaults } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
 export default defineConfig({
@@ -8,9 +8,10 @@ export default defineConfig({
     root: './',
     reporters: ['verbose'],
     coverage: {
-      provider: 'istanbul',
+      provider: 'v8',
       reporter: ['text', 'html', 'json'],
     },
+    exclude: [...configDefaults.exclude, 'html/assets'],
   },
   plugins: [
     // This is required to build the test files with SWC
